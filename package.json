@@ -1,0 +1,23 @@
+{
+  "name": "secondbrain",
+  "version": "1.0.0",
+  "description": "This is a application in which you CRUD the things and elements you want ",
+  "license": "ISC",
+  "author": "Anjeet Singh",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodemon ./JsFiles/index.js"
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongoose": "^9.1.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.0.8"
+  }
+}
