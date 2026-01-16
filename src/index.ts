@@ -27,11 +27,40 @@ console.log(`an error occured ${e}`)
 app.use(cors())
 app.use(express.json())
 
+app.post("/api/v1/signup" , (req,res)=>{
 
-app.get('/', (req: express.Request, res: express.Response) => {
-	res.send("This route is made using typescript");
-});
+})
 
+
+app.post("/api/v1/signup" , (req,res)=>{
+
+})
+
+app.post("/api/v1/content" , (req,res)=>{
+
+})
+
+app.get("/api/v1/content" , (req,res)=>{
+
+})
+
+app.delete("/api/v1/content" , (req,res)=>{
+
+})
+
+app.post("/api/v1/brain/share" , (req,res)=>{
+
+})
+
+
+
+app.post("/api/v1/brain/:shareLink" , (req,res)=>{
+
+})
+
+
+
+//this is to start the server
 app.listen(port, () => {
 	console.log(`Server running at http://localhost:${port}`);
 });
