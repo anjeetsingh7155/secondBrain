@@ -4,7 +4,7 @@
   "description": "This is a application in which you CRUD the things and elements you want ",
   "license": "ISC",
   "author": "Anjeet Singh",
-  "type": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "nodemon ./JsFiles/index.js"
