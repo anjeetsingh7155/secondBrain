@@ -1,6 +1,6 @@
-import mongoose = require("mongoose");
+import {Schema , Model} from "mongoose";
 
-const schema =  mongoose.Schema;
+const schema =  mongoose.schema;
 
 const userId = mongoose.Types.ObjectId;
 
