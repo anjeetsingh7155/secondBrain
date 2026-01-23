@@ -1,10 +1,8 @@
-import {Schema , Model} from "mongoose";
+import mongoose , {Schema , Model} from "mongoose";
+const objectId = mongoose.Types.ObjectId
 
-const schema =  mongoose.schema;
-
-const userId = mongoose.Types.ObjectId;
-
-
-const user  = new schema({
-    
+const userModel = new  Model({
+id : objectId ,
+userName : {type : String , unique : true},
+password :{type : String , unique : true}
 })
