@@ -7,9 +7,9 @@
   "main": "./JsFiles/index.js",
   "type": "commonjs",
   "scripts": {
-    "build": "tsc",
-    "start": "node ./JsFiles/index.js",
-    "dev": "nodemon ./JsFiles/index.js"
+    "build": "tsc -b",
+    "start": "nodemon ./JsFiles/index.js",
+    "dev": "npm run build && npm run start"
   },
   "dependencies": {
     "@types/bcrypt": "^6.0.0",
