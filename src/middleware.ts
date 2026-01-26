@@ -16,7 +16,7 @@ try {
 (req as any).userName = decoded_Data.userName;
     next();
     } catch (e : any ) {
-        console.error("JWT Verification Error:", e.message); // Debugging
+        console.error("JWT Verification Error:", e.message); 
         res.status(403).json({ message: "Invalid or expired token" });
     }
 }
