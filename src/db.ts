@@ -1,5 +1,5 @@
 import mongoose , {Schema , Model} from "mongoose";
-import { email } from "zod";
+
 const objectId = mongoose.Types.ObjectId
 
 const userSchema = new  Schema({

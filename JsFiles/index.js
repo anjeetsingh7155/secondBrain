@@ -39,18 +39,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const z = __importStar(require("zod"));
 const express_1 = __importDefault(require("express"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const db_js_1 = require("./db.js");
+const db_1 = require("./db");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const app = (0, express_1.default)();
 const cors = require("cors");
 const port = 5000;
 const mongoose = require("mongoose");
+//env imports
 const dotenv = require("dotenv");
 dotenv.config();
-const dbUrl = process.env.databaseURL;
+const { databaseURL, userJWTpass } = process.env;
 //this for connecting Database
 const databaseConnection = () => {
     return new Promise((resolve, reject) => {
-        mongoose.connect(dbUrl).then(resolve).catch(reject);
+        mongoose.connect(databaseURL).then(resolve).catch(reject);
     });
 };
 databaseConnection()
@@ -86,7 +88,7 @@ app.post("/api/v1/signup", async (req, res) => {
         }
         const { email, userName, password } = safeObject.data;
         const bcryptPass = await bcrypt_1.default.hash(password, 10);
-        db_js_1.userModel.create({
+        db_1.userModel.create({
             email: email,
             userName: userName,
             password: bcryptPass,
@@ -101,7 +103,39 @@ app.post("/api/v1/signup", async (req, res) => {
         });
     }
 });
-app.post("/api/v1/signup", (req, res) => { });
+app.post("/api/v1/login", async (req, res) => {
+    try {
+        const { userName, email, password } = req.body;
+        const user = await db_1.userModel.findOne({
+            userName: userName,
+            email: email
+        });
+        if (!user) {
+            res.status(404).json("user not Found");
+            return;
+        }
+        const passwordMatch = await bcrypt_1.default.compare(password, user.password);
+        if (!passwordMatch) {
+            res.status(401).json("Wrong Credentials");
+            return;
+        }
+        if (!userJWTpass) {
+            res.status(500).json({ error: "JWT secret is not defined in environment variables." });
+            return;
+        }
+        const token = jsonwebtoken_1.default.sign({
+            userName: user.userName,
+            id: user.id,
+        }, userJWTpass);
+        res.status(200).json({
+            token: token,
+            message: "Signup Successful"
+        });
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
 app.post("/api/v1/content", (req, res) => { });
 app.get("/api/v1/content", (req, res) => { });
 app.delete("/api/v1/content", (req, res) => { });

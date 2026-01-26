@@ -2,18 +2,21 @@ import * as z from "zod";
 import express, { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
 import { userModel } from "./db";
+import {userType} from "./types"
+import  Jwt from "jsonwebtoken";
 const app = express();
 const cors = require("cors");
 const port = 5000;
 const mongoose = require("mongoose");
+//env imports
 const dotenv = require("dotenv");
 dotenv.config();
-const dbUrl = process.env.databaseURL;
+const {databaseURL ,userJWTpass}  = process.env;
 
 //this for connecting Database
 const databaseConnection = () => {
   return new Promise((resolve, reject) => {
-    mongoose.connect(dbUrl).then(resolve).catch(reject);
+    mongoose.connect(databaseURL).then(resolve).catch(reject);
   });
 };
 databaseConnection()
@@ -72,7 +75,46 @@ app.post("/api/v1/signup", async (req: Request, res: Response) => {
   }
 });
 
-app.post("/api/v1/signup", (req: Request, res: Response) => {});
+app.post("/api/v1/login", async (req: Request, res: Response) => {
+  try {
+     const {userName ,email,password} = req.body
+
+ const user : userType | null  = await userModel.findOne({
+      userName : userName ,
+      email : email
+  })
+  if(!user){
+    res.status(404).json("user not Found");
+    return;
+  }
+
+  const passwordMatch = await bcrypt.compare(password ,user.password)
+
+   if(!passwordMatch){
+    res.status(401).json("Wrong Credentials");
+    return;
+  }
+
+  if (!userJWTpass) {
+    res.status(500).json({ error: "JWT secret is not defined in environment variables." });
+    return;
+  }
+  const token = Jwt.sign(
+    {
+      userName: user.userName,
+      id: user.id,
+    },
+    userJWTpass
+  );
+  res.status(200).json({
+    token : token,
+    message : "Signup Successful"
+  })
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+ 
+});
 
 app.post("/api/v1/content", (req: Request, res: Response) => {});
 
