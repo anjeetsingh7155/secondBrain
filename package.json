@@ -1,13 +1,15 @@
 {
   "name": "secondbrain",
   "version": "1.0.0",
-  "description": "This is a application in which you CRUD the things and elements you want ",
+  "description": "This is a application in which you CRUD the things and elements you want",
   "license": "ISC",
   "author": "Anjeet Singh",
-  "type": "module",
-  "main": "index.js",
+  "main": "./JsFiles/index.js",
+  "type": "commonjs",
   "scripts": {
-    "test": "nodemon ./JsFiles/index.js"
+    "build": "tsc",
+    "start": "node ./JsFiles/index.js",
+    "dev": "nodemon ./JsFiles/index.js"
   },
   "dependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -23,6 +25,8 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "@types/node": "^25.0.8"
+    "@types/node": "^25.0.8",
+    "nodemon": "^3.1.11",
+    "typescript": "^5.9.3"
   }
 }
