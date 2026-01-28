@@ -41,6 +41,7 @@ const express_1 = __importDefault(require("express"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const db_1 = require("./db");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const middleware_1 = require("./middleware");
 const app = (0, express_1.default)();
 const cors = require("cors");
 const port = 5000;
@@ -88,7 +89,7 @@ app.post("/api/v1/signup", async (req, res) => {
         }
         const { email, userName, password } = safeObject.data;
         const bcryptPass = await bcrypt_1.default.hash(password, 10);
-        db_1.userModel.create({
+        await db_1.userModel.create({
             email: email,
             userName: userName,
             password: bcryptPass,
@@ -108,7 +109,7 @@ app.post("/api/v1/login", async (req, res) => {
         const { userName, email, password } = req.body;
         const user = await db_1.userModel.findOne({
             userName: userName,
-            email: email
+            email: email,
         });
         if (!user) {
             res.status(404).json("user not Found");
@@ -120,23 +121,45 @@ app.post("/api/v1/login", async (req, res) => {
             return;
         }
         if (!userJWTpass) {
-            res.status(500).json({ error: "JWT secret is not defined in environment variables." });
+            res
+                .status(500)
+                .json({ error: "JWT secret is not defined in environment variables." });
             return;
         }
         const token = jsonwebtoken_1.default.sign({
             userName: user.userName,
-            id: user.id,
+            id: user._id,
         }, userJWTpass);
         res.status(200).json({
             token: token,
-            message: "Signup Successful"
+            message: "Signup Successful",
         });
     }
     catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
-app.post("/api/v1/content", (req, res) => { });
+app.post("/api/v1/content", middleware_1.AuthMiddleware, async (req, res) => {
+    try {
+        // @ts-ignore
+        const id = req.userID;
+        const { link, type, title } = req.body;
+        await db_1.contentModel.create({
+            link: link,
+            type: type,
+            title: title,
+            tags: [],
+            userId: id,
+        });
+        return res.status(200).json("content Added Successfully");
+    }
+    catch (error) {
+        res.status(400).json({
+            message: "Invalid Syntax of Input",
+            error: error.message,
+        });
+    }
+});
 app.get("/api/v1/content", (req, res) => { });
 app.delete("/api/v1/content", (req, res) => { });
 app.post("/api/v1/brain/share", (req, res) => { });

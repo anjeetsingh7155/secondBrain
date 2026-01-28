@@ -106,7 +106,7 @@ app.post("/api/v1/login", async (req: Request, res: Response) => {
     const token = Jwt.sign(
       {
         userName: user.userName,
-        id: user.id,
+        id: user._id,
       },
       userJWTpass,
     );
@@ -121,7 +121,8 @@ app.post("/api/v1/login", async (req: Request, res: Response) => {
 
 app.post("/api/v1/content",AuthMiddleware,async (req: Request, res: Response) => {
     try {
-      const id: string = (req as any).userID;
+      // @ts-ignore
+      const id = req.userID ;
       const { link, type, title } = req.body;
 
       await contentModel.create({

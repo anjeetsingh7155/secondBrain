@@ -1,4 +1,4 @@
-import mongoose , {Schema , Model, Types} from "mongoose";
+import mongoose , {Schema , Model, Types, model} from "mongoose";
 import { contentTypes } from "./types";
 
 const objectId = Types.ObjectId
@@ -21,5 +21,5 @@ const contentSchema = new Schema({
 
 
 //exported models
-export const userModel = new Model("Users" , userSchema)
-export const contentModel  = new Model("Contents" , contentSchema)
+export const userModel = mongoose.model("Users" , userSchema)
+export const contentModel  = mongoose.model("Contents" , contentSchema)

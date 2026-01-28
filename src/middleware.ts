@@ -1,19 +1,23 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { string } from "zod";
 dotenv.config();
 const userJWTpass : string | undefined = process.env.userJWTpass;
 
 export const AuthMiddleware = (req : Request,res : Response ,next : NextFunction)=>{
-const token = req.headers.authorization;
+const token = req.headers["authorization"];
+console.log(token)
 try {
     if (!token || !userJWTpass) {
         res.status(403).json({ message: "Invalid or expired token" });
         return;
     }
-     const decoded_Data = jwt.verify(token, userJWTpass) as any;
-        (req as any).userID = decoded_Data.id;
-(req as any).userName = decoded_Data.userName;
+     const decoded_Data : any = jwt.verify(token, userJWTpass);
+     // @ts-ignore
+        req.userID  = decoded_Data.id;
+        // @ts-ignore
+        req.userName = decoded_Data.userName;
     next();
     } catch (e : any ) {
         console.error("JWT Verification Error:", e.message); 
