@@ -5,3 +5,5 @@ export type userType = {
     password : string,
     userName : string
 }
+
+export const contentTypes = ['image', 'video', 'article', 'audio']; // Extend as needed

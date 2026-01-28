@@ -1,6 +1,7 @@
-import mongoose , {Schema , Model} from "mongoose";
+import mongoose , {Schema , Model, Types} from "mongoose";
+import { contentTypes } from "./types";
 
-const objectId = mongoose.Types.ObjectId
+const objectId = Types.ObjectId
 
 const userSchema = new  Schema({
 id : objectId ,
@@ -9,4 +10,14 @@ userName : {type : String , unique : true},
 password :{type : String , unique : true}
 })
 
-export const userModel =  mongoose.model("Users" , userSchema)
+
+const contentSchema = new Schema({
+  link: { type: String, required: true },
+  type: { type: String, enum: contentTypes, required: true },
+  title: { type: String, required: true },
+  tags: [{ type: Types.ObjectId, ref: 'Tag' }],
+  userId: { type: Types.ObjectId, ref: 'User', required: true },
+});
+
+export const userModel = new Model("Users" , userSchema)
+export const contentModel  = new Model("Contents" , contentSchema)

@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import { userModel } from "./db";
 import {userType} from "./types"
 import  Jwt from "jsonwebtoken";
+import {AuthMiddleware} from "./middleware"
+
 const app = express();
 const cors = require("cors");
 const port = 5000;
@@ -12,6 +14,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config();
 const {databaseURL ,userJWTpass}  = process.env;
+
 
 //this for connecting Database
 const databaseConnection = () => {
@@ -116,7 +119,13 @@ app.post("/api/v1/login", async (req: Request, res: Response) => {
  
 });
 
-app.post("/api/v1/content", (req: Request, res: Response) => {});
+app.use(AuthMiddleware);
+
+app.post("/api/v1/content", (req: Request, res: Response) => {
+  const id = (req as any ).userID
+  const {link,type,title} = req.body
+  
+});
 
 app.get("/api/v1/content", (req: Request, res: Response) => {});
 
