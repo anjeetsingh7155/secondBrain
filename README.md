@@ -22,7 +22,7 @@ In the future, this project will also include **AI features** to make searching 
 **Frontend**
 - React.js
 - TypeScript
-- Tailwind CSS (if used)
+- Tailwind CSS 
 
 **Backend**
 - Node.js
