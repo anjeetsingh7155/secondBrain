@@ -19,5 +19,7 @@ const contentSchema = new Schema({
   userId: { type: Types.ObjectId, ref: 'User', required: true },
 });
 
+
+//exported models
 export const userModel = new Model("Users" , userSchema)
 export const contentModel  = new Model("Contents" , contentSchema)

@@ -1,10 +1,10 @@
 import * as z from "zod";
 import express, { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
-import { userModel } from "./db";
-import {userType} from "./types"
-import  Jwt from "jsonwebtoken";
-import {AuthMiddleware} from "./middleware"
+import { contentModel, userModel } from "./db";
+import { userType } from "./types";
+import Jwt from "jsonwebtoken";
+import { AuthMiddleware } from "./middleware";
 
 const app = express();
 const cors = require("cors");
@@ -13,8 +13,7 @@ const mongoose = require("mongoose");
 //env imports
 const dotenv = require("dotenv");
 dotenv.config();
-const {databaseURL ,userJWTpass}  = process.env;
-
+const { databaseURL, userJWTpass } = process.env;
 
 //this for connecting Database
 const databaseConnection = () => {
@@ -62,7 +61,7 @@ app.post("/api/v1/signup", async (req: Request, res: Response) => {
 
     const bcryptPass = await bcrypt.hash(password, 10);
 
-    userModel.create({
+    await userModel.create({
       email: email,
       userName: userName,
       password: bcryptPass,
@@ -80,52 +79,68 @@ app.post("/api/v1/signup", async (req: Request, res: Response) => {
 
 app.post("/api/v1/login", async (req: Request, res: Response) => {
   try {
-     const {userName ,email,password} = req.body
+    const { userName, email, password } = req.body;
 
- const user : userType | null  = await userModel.findOne({
-      userName : userName ,
-      email : email
-  })
-  if(!user){
-    res.status(404).json("user not Found");
-    return;
-  }
+    const user: userType | null = await userModel.findOne({
+      userName: userName,
+      email: email,
+    });
+    if (!user) {
+      res.status(404).json("user not Found");
+      return;
+    }
 
-  const passwordMatch = await bcrypt.compare(password ,user.password)
+    const passwordMatch = await bcrypt.compare(password, user.password);
 
-   if(!passwordMatch){
-    res.status(401).json("Wrong Credentials");
-    return;
-  }
+    if (!passwordMatch) {
+      res.status(401).json("Wrong Credentials");
+      return;
+    }
 
-  if (!userJWTpass) {
-    res.status(500).json({ error: "JWT secret is not defined in environment variables." });
-    return;
-  }
-  const token = Jwt.sign(
-    {
-      userName: user.userName,
-      id: user.id,
-    },
-    userJWTpass
-  );
-  res.status(200).json({
-    token : token,
-    message : "Signup Successful"
-  })
+    if (!userJWTpass) {
+      res
+        .status(500)
+        .json({ error: "JWT secret is not defined in environment variables." });
+      return;
+    }
+    const token = Jwt.sign(
+      {
+        userName: user.userName,
+        id: user.id,
+      },
+      userJWTpass,
+    );
+    res.status(200).json({
+      token: token,
+      message: "Signup Successful",
+    });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
- 
 });
 
-app.use(AuthMiddleware);
+app.post("/api/v1/content",AuthMiddleware,async (req: Request, res: Response) => {
+    try {
+      const id: string = (req as any).userID;
+      const { link, type, title } = req.body;
 
-app.post("/api/v1/content", (req: Request, res: Response) => {
-  const id = (req as any ).userID
-  const {link,type,title} = req.body
-  
-});
+      await contentModel.create({
+        link: link,
+        type: type,
+        title: title,
+        tags: [],
+        userId: id,
+      });
+
+      return res.status(200).json("content Added Successfully");
+    } catch (error: any) {
+      res.status(400).json({
+        message: "Invalid Syntax of Input",
+        error: error.message,
+      });
+    }
+  },
+);
 
 app.get("/api/v1/content", (req: Request, res: Response) => {});
 
