@@ -143,7 +143,23 @@ app.post("/api/v1/content",AuthMiddleware,async (req: Request, res: Response) =>
   },
 );
 
-app.get("/api/v1/content", (req: Request, res: Response) => {});
+app.get("/api/v1/content",AuthMiddleware, async (req: Request, res: Response) => {
+try {
+  //@ts-ignore
+  const id = req.userID ;
+
+  const contents = await contentModel.find({ userId: id }).sort({ createdAt: -1 });
+
+  res.status(200).json({
+    contents : contents, 
+  })
+} catch (error : any) {
+ return res.status(500).json({
+      message: "Server error while fetching content",
+      error: error.message,
+    });
+}
+});
 
 app.delete("/api/v1/content", (req: Request, res: Response) => {});
 

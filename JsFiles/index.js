@@ -160,7 +160,22 @@ app.post("/api/v1/content", middleware_1.AuthMiddleware, async (req, res) => {
         });
     }
 });
-app.get("/api/v1/content", (req, res) => { });
+app.get("/api/v1/content", middleware_1.AuthMiddleware, async (req, res) => {
+    try {
+        //@ts-ignore
+        const id = req.userID;
+        const contents = await db_1.contentModel.find({ userId: id }).sort({ createdAt: -1 });
+        res.status(200).json({
+            contents: contents,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            message: "Server error while fetching content",
+            error: error.message,
+        });
+    }
+});
 app.delete("/api/v1/content", (req, res) => { });
 app.post("/api/v1/brain/share", (req, res) => { });
 app.post("/api/v1/brain/:shareLink", (req, res) => { });
