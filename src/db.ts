@@ -5,9 +5,9 @@ const objectId = Types.ObjectId
 
 const userSchema = new  Schema({
 id : objectId ,
-email : {type : String , unique : true},
-userName : {type : String , unique : true},
-password :{type : String , unique : true}
+email : {type : String , unique : true , require : true },
+userName : {type : String , unique : true ,required : true},
+password :{type : String , unique : true , required : true}
 })
 
 
