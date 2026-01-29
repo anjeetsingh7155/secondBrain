@@ -5,9 +5,12 @@ const objectId = Types.ObjectId
 
 const userSchema = new  Schema({
 id : objectId ,
-email : {type : String , unique : true , require : true },
+email : {type : String , unique : true , required : true },
 userName : {type : String , unique : true ,required : true},
-password :{type : String , unique : true , required : true}
+password :{type : String , unique : true , required : true},
+
+    isShared: { type: Boolean, default: false },
+    shareLink: { type: String, unique: true, sparse: true },
 })
 
 

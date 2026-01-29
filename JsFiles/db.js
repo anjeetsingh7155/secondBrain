@@ -39,9 +39,11 @@ const types_1 = require("./types");
 const objectId = mongoose_1.Types.ObjectId;
 const userSchema = new mongoose_1.Schema({
     id: objectId,
-    email: { type: String, unique: true, require: true },
+    email: { type: String, unique: true, required: true },
     userName: { type: String, unique: true, required: true },
-    password: { type: String, unique: true, required: true }
+    password: { type: String, unique: true, required: true },
+    isShared: { type: Boolean, default: false },
+    shareLink: { type: String, unique: true, sparse: true },
 });
 const contentSchema = new mongoose_1.Schema({
     link: { type: String, required: true },

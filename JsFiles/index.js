@@ -42,6 +42,7 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const db_1 = require("./db");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const middleware_1 = require("./middleware");
+const crypto_1 = __importDefault(require("crypto"));
 const app = (0, express_1.default)();
 const cors = require("cors");
 const port = 5000;
@@ -164,7 +165,7 @@ app.get("/api/v1/content", middleware_1.AuthMiddleware, async (req, res) => {
     try {
         //@ts-ignore
         const userId = req.userID;
-        const contents = await db_1.contentModel.find({ userId: userId }).sort({ createdAt: -1 }).populate({ path: "userId", select: "userName" });
+        const contents = await db_1.contentModel.find({ userId: userId }).populate({ path: "userId", select: "userName" });
         res.status(200).json({
             contents: contents,
         });
@@ -194,8 +195,84 @@ app.delete("/api/v1/content", middleware_1.AuthMiddleware, async (req, res) => {
         });
     }
 });
-app.post("/api/v1/brain/share", (req, res) => { });
-app.post("/api/v1/brain/:shareLink", (req, res) => { });
+app.post("/api/v1/brain/share", middleware_1.AuthMiddleware, async (req, res) => {
+    try {
+        // @ts-ignore
+        const userId = req.userID;
+        const { share } = req.body;
+        if (typeof share !== "boolean") {
+            return res.status(400).json({
+                message: "share must be boolean true/false",
+            });
+        }
+        const user = await db_1.userModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        // disable sharing
+        if (share === false) {
+            user.isShared = false;
+            user.shareLink = undefined;
+            await user.save();
+            return res.status(200).json({
+                link: null,
+            });
+        }
+        // enable sharing
+        if (!user.shareLink) {
+            user.shareLink = crypto_1.default.randomBytes(16).toString("hex");
+        }
+        user.isShared = true;
+        await user.save();
+        // return full link (as asked)
+        return res.status(200).json({
+            link: `/api/v1/brain/${user.shareLink}`,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            message: "Error while creating share link",
+            error: error.message,
+        });
+    }
+});
+app.get("/api/v1/brain/:shareLink", async (req, res) => {
+    try {
+        const shareLink = req.params.shareLink;
+        const user = await db_1.userModel.findOne({
+            shareLink,
+            isShared: true,
+        });
+        //404 if invalid or disabled
+        if (!user) {
+            return res.status(404).json({
+                message: "Invalid share link or sharing disabled",
+            });
+        }
+        const contents = await db_1.contentModel
+            .find({ userId: user._id })
+            .sort({ createdAt: -1 })
+            .populate({ path: "tags", select: "title" });
+        //format as required in prompt
+        const formattedContent = contents.map((c) => ({
+            id: c._id,
+            type: c.type,
+            link: c.link,
+            title: c.title,
+            tags: c.tags?.map((t) => t.title) || [],
+        }));
+        return res.status(200).json({
+            username: user.userName,
+            content: formattedContent,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            message: "Server error",
+            error: error.message,
+        });
+    }
+});
 //this is to start the server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
