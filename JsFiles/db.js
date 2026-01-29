@@ -39,9 +39,9 @@ const types_1 = require("./types");
 const objectId = mongoose_1.Types.ObjectId;
 const userSchema = new mongoose_1.Schema({
     id: objectId,
-    email: { type: String, unique: true },
-    userName: { type: String, unique: true },
-    password: { type: String, unique: true }
+    email: { type: String, unique: true, require: true },
+    userName: { type: String, unique: true, required: true },
+    password: { type: String, unique: true, required: true }
 });
 const contentSchema = new mongoose_1.Schema({
     link: { type: String, required: true },

@@ -7,4 +7,4 @@ export type userType = {
     userName : string
 }
 
-export const contentTypes = ['image', 'video', 'article', 'audio' ,'link']; // Extend as needed
+export const contentTypes = ['image', 'video', 'article', 'audio' ,'link']; 

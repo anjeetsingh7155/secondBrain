@@ -17,9 +17,7 @@ const AuthMiddleware = (req, res, next) => {
             return;
         }
         const decoded_Data = jsonwebtoken_1.default.verify(token, userJWTpass);
-        // @ts-ignore
         req.userID = decoded_Data.id;
-        // @ts-ignore
         req.userName = decoded_Data.userName;
         next();
     }

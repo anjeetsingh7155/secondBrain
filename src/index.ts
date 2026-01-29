@@ -161,8 +161,24 @@ try {
 }
 });
 
-app.delete("/api/v1/content", (req: Request, res: Response) => {
+app.delete("/api/v1/content", AuthMiddleware , async (req: Request, res: Response) => {
+  try {
+    const contentId = req.body.id
+  //@ts-ignore
+  const userID = req.userID
+  await contentModel.deleteOne({
+    _id : contentId ,
+    userId : userID
+  })
+  res.status(200).json("Content Deleted Successfully")
 
+  } catch (error : any) {
+    res.status(404).json({
+      message : "Content Not deleted ",
+      error : error.message
+    })
+  }
+  
 });
 
 app.post("/api/v1/brain/share", (req: Request, res: Response) => {});

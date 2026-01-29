@@ -176,7 +176,23 @@ app.get("/api/v1/content", middleware_1.AuthMiddleware, async (req, res) => {
         });
     }
 });
-app.delete("/api/v1/content", (req, res) => {
+app.delete("/api/v1/content", middleware_1.AuthMiddleware, async (req, res) => {
+    try {
+        const contentId = req.body.id;
+        //@ts-ignore
+        const userID = req.userID;
+        await db_1.contentModel.deleteOne({
+            _id: contentId,
+            userId: userID
+        });
+        res.status(200).json("Content Deleted Successfully");
+    }
+    catch (error) {
+        res.status(404).json({
+            message: "Content Not deleted ",
+            error: error.message
+        });
+    }
 });
 app.post("/api/v1/brain/share", (req, res) => { });
 app.post("/api/v1/brain/:shareLink", (req, res) => { });
