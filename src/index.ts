@@ -146,9 +146,9 @@ app.post("/api/v1/content",AuthMiddleware,async (req: Request, res: Response) =>
 app.get("/api/v1/content",AuthMiddleware, async (req: Request, res: Response) => {
 try {
   //@ts-ignore
-  const id = req.userID ;
+  const userId = req.userID ;
 
-  const contents = await contentModel.find({ userId: id }).sort({ createdAt: -1 });
+  const contents = await contentModel.find({ userId: userId }).sort({ createdAt: -1 }).populate("userId","userName");
 
   res.status(200).json({
     contents : contents, 
@@ -161,7 +161,9 @@ try {
 }
 });
 
-app.delete("/api/v1/content", (req: Request, res: Response) => {});
+app.delete("/api/v1/content", (req: Request, res: Response) => {
+
+});
 
 app.post("/api/v1/brain/share", (req: Request, res: Response) => {});
 

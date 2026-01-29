@@ -48,8 +48,8 @@ const contentSchema = new mongoose_1.Schema({
     type: { type: String, enum: types_1.contentTypes, required: true },
     title: { type: String, required: true },
     tags: [{ type: mongoose_1.Types.ObjectId, ref: 'Tag' }],
-    userId: { type: mongoose_1.Types.ObjectId, ref: 'User', required: true },
+    userId: { type: mongoose_1.Types.ObjectId, ref: 'users', required: true },
 });
 //exported models
-exports.userModel = mongoose_1.default.model("Users", userSchema);
-exports.contentModel = mongoose_1.default.model("Contents", contentSchema);
+exports.userModel = mongoose_1.default.model("users", userSchema);
+exports.contentModel = mongoose_1.default.model("contents", contentSchema);

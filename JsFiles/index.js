@@ -163,8 +163,8 @@ app.post("/api/v1/content", middleware_1.AuthMiddleware, async (req, res) => {
 app.get("/api/v1/content", middleware_1.AuthMiddleware, async (req, res) => {
     try {
         //@ts-ignore
-        const id = req.userID;
-        const contents = await db_1.contentModel.find({ userId: id }).sort({ createdAt: -1 });
+        const userId = req.userID;
+        const contents = await db_1.contentModel.find({ userId: userId }).sort({ createdAt: -1 }).populate("userId", "userName");
         res.status(200).json({
             contents: contents,
         });
@@ -176,7 +176,8 @@ app.get("/api/v1/content", middleware_1.AuthMiddleware, async (req, res) => {
         });
     }
 });
-app.delete("/api/v1/content", (req, res) => { });
+app.delete("/api/v1/content", (req, res) => {
+});
 app.post("/api/v1/brain/share", (req, res) => { });
 app.post("/api/v1/brain/:shareLink", (req, res) => { });
 //this is to start the server

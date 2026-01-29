@@ -16,10 +16,10 @@ const contentSchema = new Schema({
   type: { type: String, enum: contentTypes, required: true },
   title: { type: String, required: true },
   tags: [{ type: Types.ObjectId, ref: 'Tag' }],
-  userId: { type: Types.ObjectId, ref: 'User', required: true },
+  userId: { type: Types.ObjectId, ref: 'users', required: true },
 });
 
 
 //exported models
-export const userModel = mongoose.model("Users" , userSchema)
-export const contentModel  = mongoose.model("Contents" , contentSchema)
+export const userModel = mongoose.model("users" , userSchema)
+export const contentModel  = mongoose.model("contents" , contentSchema)
