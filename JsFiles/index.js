@@ -42,7 +42,6 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const db_1 = require("./db");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const middleware_1 = require("./middleware");
-const crypto_1 = __importDefault(require("crypto"));
 const app = (0, express_1.default)();
 const cors = require("cors");
 const port = 5000;
@@ -212,21 +211,17 @@ app.post("/api/v1/brain/share", middleware_1.AuthMiddleware, async (req, res) =>
         // disable sharing
         if (share === false) {
             user.isShared = false;
-            user.shareLink = undefined;
             await user.save();
             return res.status(200).json({
                 link: null,
             });
         }
         // enable sharing
-        if (!user.shareLink) {
-            user.shareLink = crypto_1.default.randomBytes(16).toString("hex");
-        }
         user.isShared = true;
         await user.save();
         // return full link (as asked)
         return res.status(200).json({
-            link: `/api/v1/brain/${user.shareLink}`,
+            link: `/api/v1/brain/${user.userName}`,
         });
     }
     catch (error) {
@@ -238,9 +233,9 @@ app.post("/api/v1/brain/share", middleware_1.AuthMiddleware, async (req, res) =>
 });
 app.get("/api/v1/brain/:shareLink", async (req, res) => {
     try {
-        const shareLink = req.params.shareLink;
+        const userName = req.params.shareLink;
         const user = await db_1.userModel.findOne({
-            shareLink,
+            userName: userName,
             isShared: true,
         });
         //404 if invalid or disabled

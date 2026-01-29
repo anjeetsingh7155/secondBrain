@@ -203,7 +203,6 @@ app.post("/api/v1/brain/share", AuthMiddleware, async (req: Request, res: Respon
     // disable sharing
     if (share === false) {
       user.isShared = false;
-      user.shareLink = undefined;
       await user.save();
 
       return res.status(200).json({
@@ -212,16 +211,13 @@ app.post("/api/v1/brain/share", AuthMiddleware, async (req: Request, res: Respon
     }
 
     // enable sharing
-    if (!user.shareLink) {
-      user.shareLink = crypto.randomBytes(16).toString("hex");
-    }
 
     user.isShared = true;
     await user.save();
 
     // return full link (as asked)
     return res.status(200).json({
-      link: `/api/v1/brain/${user.shareLink}`,
+      link: `/api/v1/brain/${user.userName}`,
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -234,10 +230,9 @@ app.post("/api/v1/brain/share", AuthMiddleware, async (req: Request, res: Respon
 
 app.get("/api/v1/brain/:shareLink", async (req: Request, res: Response) => {
   try {
-    const shareLink = req.params.shareLink;
-
+    const userName = req.params.shareLink;
     const user = await userModel.findOne({
-      shareLink,
+      userName : userName,
       isShared: true,
     });
 
