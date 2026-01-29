@@ -248,10 +248,7 @@ app.get("/api/v1/brain/:shareLink", async (req: Request, res: Response) => {
       });
     }
 
-    const contents = await contentModel
-      .find({ userId: user._id })
-      .sort({ createdAt: -1 })
-      .populate({ path: "tags", select: "title" });
+    const contents = await contentModel.find({ userId: user._id }).populate({ path: "tags", select: "title" });
 
     //format as required in prompt
     const formattedContent = contents.map((c: any) => ({

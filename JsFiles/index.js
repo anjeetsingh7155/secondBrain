@@ -249,10 +249,7 @@ app.get("/api/v1/brain/:shareLink", async (req, res) => {
                 message: "Invalid share link or sharing disabled",
             });
         }
-        const contents = await db_1.contentModel
-            .find({ userId: user._id })
-            .sort({ createdAt: -1 })
-            .populate({ path: "tags", select: "title" });
+        const contents = await db_1.contentModel.find({ userId: user._id }).populate({ path: "tags", select: "title" });
         //format as required in prompt
         const formattedContent = contents.map((c) => ({
             id: c._id,
