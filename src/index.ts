@@ -147,8 +147,7 @@ app.get("/api/v1/content",AuthMiddleware, async (req: Request, res: Response) =>
 try {
   //@ts-ignore
   const userId = req.userID ;
-
-  const contents = await contentModel.find({ userId: userId }).sort({ createdAt: -1 }).populate("userId","userName");
+  const contents = await contentModel.find({ userId: userId }).sort({ createdAt: -1 }).populate({path:"userId",select:"userName"});
 
   res.status(200).json({
     contents : contents, 

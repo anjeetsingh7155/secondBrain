@@ -1,7 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { string } from "zod";
 dotenv.config();
 const userJWTpass : string | undefined = process.env.userJWTpass;
 

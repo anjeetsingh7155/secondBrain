@@ -10,7 +10,6 @@ dotenv_1.default.config();
 const userJWTpass = process.env.userJWTpass;
 const AuthMiddleware = (req, res, next) => {
     const token = req.headers["authorization"];
-    console.log(token);
     try {
         if (!token || !userJWTpass) {
             res.status(403).json({ message: "Invalid or expired token" });

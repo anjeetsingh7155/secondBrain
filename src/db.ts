@@ -19,7 +19,11 @@ const contentSchema = new Schema({
   userId: { type: Types.ObjectId, ref: 'users', required: true },
 });
 
+const tagSchema = new Schema({
+  title: { type: String, required: true, unique: true }
+});
 
 //exported models
 export const userModel = mongoose.model("users" , userSchema)
 export const contentModel  = mongoose.model("contents" , contentSchema)
+export const TagModel = mongoose.model("Tag" , tagSchema)
