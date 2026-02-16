@@ -1,7 +1,7 @@
 import * as z from "zod";
 import express, { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
-import { contentModel, userModel } from "./db";
+import { contentModel, linkModel, TagModel, userModel } from "./db";
 import { userType } from "./types";
 import Jwt from "jsonwebtoken";
 import { AuthMiddleware } from "./middleware";
@@ -120,105 +120,167 @@ app.post("/api/v1/login", async (req: Request, res: Response) => {
   }
 });
 
-app.post("/api/v1/content",AuthMiddleware,async (req: Request, res: Response) => {
-    try {
-      // @ts-ignore
-      const id = req.userID ;
-      const { link, type, title } = req.body;
+app.post("/api/v1/content", AuthMiddleware, async (req: Request, res: Response) => {
+  try {
+    //@ts-ignore
+    const userId = req.userID;
 
-      await contentModel.create({
-        link: link,
-        type: type,
-        title: title,
-        tags: [],
-        userId: id,
-      });
+    const { link, type, title, tags } = req.body;
 
-      return res.status(200).json("content Added Successfully");
-    } catch (error: any) {
-      res.status(400).json({
-        message: "Invalid Syntax of Input",
-        error: error.message,
+    if (!link || !type || !title) {
+      return res.status(400).json({
+        message: "link, type and title are required",
       });
     }
-  },
-);
 
-app.get("/api/v1/content",AuthMiddleware, async (req: Request, res: Response) => {
-try {
-  //@ts-ignore
-  const userId = req.userID ;
-  const contents = await contentModel.find({ userId: userId }).populate({path:"userId",select:"userName"});
+    let tagIds: any[] = [];
 
-  res.status(200).json({
-    contents : contents, 
-  })
-} catch (error : any) {
- return res.status(500).json({
+    if (tags && Array.isArray(tags)) {
+      for (const tagName of tags) {
+
+        // Check if tag exists
+        let existingTag = await TagModel.findOne({ title: tagName });
+
+        if (!existingTag) {
+          existingTag = await TagModel.create({ title: tagName });
+        }
+
+        tagIds.push(existingTag._id);
+      }
+    }
+
+    const newContent = await contentModel.create({
+      link,
+      type,
+      title,
+      tags: tagIds,
+      userId,
+    });
+
+    return res.status(200).json({
+      message: "Content Added Successfully",
+      content: newContent,
+    });
+
+  } catch (error: any) {
+    return res.status(400).json({
+      message: "Error adding content",
+      error: error.message,
+    });
+  }
+});
+
+app.get("/api/v1/content", AuthMiddleware, async (req: Request, res: Response) => {
+  try {
+    //@ts-ignore
+    const userId = req.userID;
+
+    const contents = await contentModel
+      .find({ userId })
+      .populate({ path: "tags", select: "title -_id" });
+
+    const formatted = contents.map((c: any) => ({
+      id: c._id,
+      link: c.link,
+      type: c.type,
+      title: c.title,
+      tags: c.tags.map((t: any) => t.title),
+    }));
+
+    return res.status(200).json({
+      contents: formatted,
+    });
+
+  } catch (error: any) {
+    return res.status(500).json({
       message: "Server error while fetching content",
       error: error.message,
     });
-}
-});
-
-app.delete("/api/v1/content", AuthMiddleware , async (req: Request, res: Response) => {
-  try {
-    const contentId = req.body.id
-  //@ts-ignore
-  const userID = req.userID
-  await contentModel.deleteOne({
-    _id : contentId ,
-    userId : userID
-  })
-  res.status(200).json("Content Deleted Successfully")
-
-  } catch (error : any) {
-    res.status(404).json({
-      message : "Content Not deleted ",
-      error : error.message
-    })
   }
-  
 });
+
+app.delete("/api/v1/content", AuthMiddleware, async (req: Request, res: Response) => {
+  try {
+    const contentId = req.body.id;
+
+    //@ts-ignore
+    const userID = req.userID;
+
+    const deleted = await contentModel.deleteOne({
+      _id: contentId,
+      userId: userID,
+    });
+
+    if (deleted.deletedCount === 0) {
+      return res.status(404).json({
+        message: "Content not found or not authorized",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Content Deleted Successfully",
+    });
+
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Error deleting content",
+      error: error.message,
+    });
+  }
+});
+
 
 app.post("/api/v1/brain/share", AuthMiddleware, async (req: Request, res: Response) => {
   try {
-    // @ts-ignore
+    //@ts-ignore
     const userId = req.userID;
-
     const { share } = req.body;
 
     if (typeof share !== "boolean") {
       return res.status(400).json({
-        message: "share must be boolean true/false",
+        message: "share must be boolean",
       });
     }
 
-    const user = await userModel.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // disable sharing
-    if (share === false) {
-      user.isShared = false;
-      await user.save();
+    // If share = false → deactivate existing link
+    if (!share) {
+      await linkModel.findOneAndUpdate(
+        { userId },
+        { isActive: false }
+      );
 
       return res.status(200).json({
         link: null,
       });
     }
 
-    // enable sharing
+    // share = true
 
-    user.isShared = true;
-    await user.save();
+    // check if link already exists
+    let existingLink = await linkModel.findOne({ userId });
 
-    // return full link (as asked)
-    return res.status(200).json({
-      link: `/api/v1/brain/${user.userName}`,
+    if (existingLink) {
+      existingLink.isActive = true;
+      await existingLink.save();
+
+      return res.status(200).json({
+        link: `/api/v1/brain/${existingLink.link}`,
+      });
+    }
+
+    // generate new secure link
+    const shareToken = crypto.randomBytes(20).toString("hex");
+
+    const newLink = await linkModel.create({
+      link: shareToken,
+      userId,
+      isActive: true,
     });
+
+    return res.status(200).json({
+      link: `/api/v1/brain/${newLink.link}`,
+    });
+
   } catch (error: any) {
     return res.status(500).json({
       message: "Error while creating share link",
@@ -230,22 +292,32 @@ app.post("/api/v1/brain/share", AuthMiddleware, async (req: Request, res: Respon
 
 app.get("/api/v1/brain/:shareLink", async (req: Request, res: Response) => {
   try {
-    const userName = req.params.shareLink;
-    const user = await userModel.findOne({
-      userName : userName,
-      isShared: true,
+    const shareToken = req.params.shareLink;
+
+    // find link first
+    const linkDoc = await linkModel.findOne({
+      link: shareToken,
+      isActive: true,
     });
 
-    //404 if invalid or disabled
-    if (!user) {
+    if (!linkDoc) {
       return res.status(404).json({
-        message: "Invalid share link or sharing disabled",
+        message: "Invalid or inactive share link",
       });
     }
 
-    const contents = await contentModel.find({ userId: user._id }).populate({ path: "tags", select: "title" });
+    const user = await userModel.findById(linkDoc.userId);
 
-    //format as required in prompt
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const contents = await contentModel
+      .find({ userId: user._id })
+      .populate({ path: "tags", select: "title" });
+
     const formattedContent = contents.map((c: any) => ({
       id: c._id,
       type: c.type,
@@ -258,6 +330,7 @@ app.get("/api/v1/brain/:shareLink", async (req: Request, res: Response) => {
       username: user.userName,
       content: formattedContent,
     });
+
   } catch (error: any) {
     return res.status(500).json({
       message: "Server error",
