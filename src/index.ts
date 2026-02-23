@@ -11,12 +11,12 @@ const app = express();
 const cors = require("cors");
 const port = 5000;
 const mongoose = require("mongoose");
-//env imports
+
 const dotenv = require("dotenv");
 dotenv.config();
 const { databaseURL, userJWTpass } = process.env;
 
-//this for connecting Database
+
 const databaseConnection = () => {
   return new Promise((resolve, reject) => {
     mongoose.connect(databaseURL).then(resolve).catch(reject);
@@ -30,7 +30,7 @@ databaseConnection()
     console.log(`an error occured ${e}`);
   });
 
-//some inportant middlewares
+
 app.use(cors());
 app.use(express.json());
 
@@ -229,7 +229,6 @@ app.delete("/api/v1/content", AuthMiddleware, async (req: Request, res: Response
   }
 });
 
-
 app.post("/api/v1/brain/share", AuthMiddleware, async (req: Request, res: Response) => {
   try {
     //@ts-ignore
@@ -241,8 +240,7 @@ app.post("/api/v1/brain/share", AuthMiddleware, async (req: Request, res: Respon
         message: "share must be boolean",
       });
     }
-
-    // If share = false → deactivate existing link
+    
     if (!share) {
       await linkModel.findOneAndUpdate(
         { userId },
@@ -253,10 +251,6 @@ app.post("/api/v1/brain/share", AuthMiddleware, async (req: Request, res: Respon
         link: null,
       });
     }
-
-    // share = true
-
-    // check if link already exists
     let existingLink = await linkModel.findOne({ userId });
 
     if (existingLink) {
@@ -267,8 +261,7 @@ app.post("/api/v1/brain/share", AuthMiddleware, async (req: Request, res: Respon
         link: `/api/v1/brain/${existingLink.link}`,
       });
     }
-
-    // generate new secure link
+    
     const shareToken = crypto.randomBytes(20).toString("hex");
 
     const newLink = await linkModel.create({
@@ -288,7 +281,6 @@ app.post("/api/v1/brain/share", AuthMiddleware, async (req: Request, res: Respon
     });
   }
 });
-
 
 app.get("/api/v1/brain/:shareLink", async (req: Request, res: Response) => {
   try {
@@ -339,8 +331,6 @@ app.get("/api/v1/brain/:shareLink", async (req: Request, res: Response) => {
   }
 });
 
-
-//this is to start the server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
