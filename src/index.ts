@@ -138,7 +138,6 @@ app.post("/api/v1/content", AuthMiddleware, async (req: Request, res: Response) 
     if (tags && Array.isArray(tags)) {
       for (const tagName of tags) {
 
-        // Check if tag exists
         let existingTag = await TagModel.findOne({ title: tagName });
 
         if (!existingTag) {
@@ -286,7 +285,6 @@ app.get("/api/v1/brain/:shareLink", async (req: Request, res: Response) => {
   try {
     const shareToken = req.params.shareLink;
 
-    // find link first
     const linkDoc = await linkModel.findOne({
       link: shareToken,
       isActive: true,
