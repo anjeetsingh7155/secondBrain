@@ -36,9 +36,8 @@ app.use(express.json());
 
 app.post("/api/v1/signup", async (req: Request, res: Response) => {
   try {
-    //zod type checking
     const safetyCheck = z.object({
-      email: z.email(),
+      email: z.string().email(),
       userName: z.string().min(3).max(17),
       password: z
         .string()
@@ -47,18 +46,27 @@ app.post("/api/v1/signup", async (req: Request, res: Response) => {
         .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,12}$/),
     });
 
-    const safeObject = await safetyCheck.safeParse(req.body);
+    const safeObject = safetyCheck.safeParse(req.body);
 
     if (!safeObject.success) {
-      return res
-        .json({
-          message: "Wrong Credentials",
-          error: safeObject.error,
-        })
-        .status(403);
+      return res.status(403).json({
+        message: "Wrong Credentials",
+        error: safeObject.error,
+      });
     }
 
     const { email, userName, password } = safeObject.data;
+
+   const existingUser: userType | null = await userModel.findOne({
+      userName: userName,
+      email: email,
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        message: "User already exists. Please login.",
+      });
+    }
 
     const bcryptPass = await bcrypt.hash(password, 10);
 
@@ -68,11 +76,12 @@ app.post("/api/v1/signup", async (req: Request, res: Response) => {
       password: bcryptPass,
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Signup Completed",
     });
+
   } catch (error: any) {
-    res.status(403).json({
+    return res.status(500).json({
       error: error.message,
     });
   }
