@@ -88,44 +88,52 @@ app.post("/api/v1/signup", async (req: Request, res: Response) => {
 });
 
 app.post("/api/v1/login", async (req: Request, res: Response) => {
-  try {
+   try {
     const { userName, email, password } = req.body;
 
-    const user: userType | null = await userModel.findOne({
-      userName: userName,
+    const user: userType | null = await userModel.findOne({ 
+      userName: userName, 
       email: email,
-    });
+     });
+
     if (!user) {
-      res.status(404).json("user not Found");
-      return;
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      res.status(401).json("Wrong Credentials");
-      return;
+      return res.status(401).json({
+        message: "Wrong credentials",
+      });
     }
 
     if (!userJWTpass) {
-      res
-        .status(500)
-        .json({ error: "JWT secret is not defined in environment variables." });
-      return;
+      return res.status(500).json({
+        error: "JWT secret not defined",
+      });
     }
+
     const token = Jwt.sign(
       {
         userName: user.userName,
         id: user._id,
       },
       userJWTpass,
+      { expiresIn: "7d" }
     );
-    res.status(200).json({
-      token: token,
-      message: "Signup Successful",
+
+    return res.status(200).json({
+      token,
+      message: "Login successful",
     });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+
+  } catch (error: unknown) {
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 });
 
