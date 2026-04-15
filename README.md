@@ -1,49 +1,110 @@
-# 🧠 SecondBrain (MERN + TypeScript)
+# 🧠 Second Brain – Backend
 
-SecondBrain is a full-stack **MERN + TypeScript** web application that helps you **save and manage important links, notes, images, and resources** for future use — just like sending messages to yourself on WhatsApp to remember things later.
-
-In the future, this project will also include **AI features** to make searching easier and to generate summaries of long text/data.
+Second Brain is a Node.js + Express backend that powers a personal knowledge management system. It handles authentication, content storage, tagging, and sharing functionality.
 
 ---
 
 ## 🚀 Features
 
-- ✅ Save important **links / notes / images / resources**
-- ✅ Quick access anytime (your personal digital memory)
-- ✅ Clean & simple UI for productivity
-- ✅ Backend REST APIs for storing and fetching data
-- ✅ Built with **TypeScript** for better scalability and type safety
-- 🔮 Future: AI search + smart summarization for long content
+- 🔐 JWT Authentication (Signup / Login)
+- 🔒 Secure password hashing using bcrypt
+- 📦 Create, Read, and Delete Content
+- 🏷️ Tag Management System
+- 🔗 Share Brain Feature (public link)
+- 🧠 User-specific content storage
 
 ---
 
 ## 🛠️ Tech Stack
 
-**Frontend**
-- React.js
-- TypeScript
-- Tailwind CSS 
-
-**Backend**
 - Node.js
 - Express.js
-- TypeScript
-
-**Database**
-- MongoDB
-
----
-
-## 📌 Use Case
-
-We often send messages to ourselves on WhatsApp to remember important things later.  
-**SecondBrain** gives you a dedicated platform to store and organize those things properly, so you can easily access them anytime.
+- MongoDB (Mongoose)
+- JWT (jsonwebtoken)
+- bcrypt
+- Zod (validation)
 
 ---
 
-## 📂 Project Setup (Local Development)
+## 📂 Project Structure
+src/ ├── db.ts ├── middleware.ts ├── types.ts ├── index.ts
 
-### 1️⃣ Clone the Repository
-```bash
-git clone https://github.com/anjeetsingh7155/secondBrain.git
-cd secondBrain
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Clone the repository
+git clone https://github.com/anjeetsingh7155/secondBrain.git⁠� cd secondBrain
+
+### 2. Install dependencies
+npm install
+
+### 3. Create `.env` file
+databaseURL=your_mongodb_connection_string userJWTpass=your_secret_key
+
+### 4. Run the server
+npm run dev
+
+---
+
+## 🔐 Authentication
+
+- User logs in and receives a JWT token
+- Token must be sent in headers for protected routes:
+Authorization: 
+
+---
+
+## 📡 API Endpoints
+
+### Auth
+- POST `/api/v1/signup`
+- POST `/api/v1/login`
+
+### Content
+- POST `/api/v1/content` → Add content
+- GET `/api/v1/content` → Get all user content
+- DELETE `/api/v1/content` → Delete content
+
+### Share Brain
+- POST `/api/v1/brain/share` → Generate share link
+- GET `/api/v1/brain/:shareLink` → Access shared content
+
+---
+
+## 🧠 Data Models
+
+### User
+- email
+- userName
+- password
+
+### Content
+- title
+- link
+- type (youtube / twitter)
+- tags
+- userId
+
+### Tag
+- title
+
+---
+
+## 🚀 Future Improvements
+
+- 🔍 Search API
+- 🏷️ Tag filtering
+- ✏️ Update content API
+- 🤖 AI integration (auto tags, summaries)
+- 📊 Analytics
+
+---
+
+## 👨‍💻 Author
+
+Anjeet Singh
+
+---
+
+⭐ If you like this project, give it a star!
