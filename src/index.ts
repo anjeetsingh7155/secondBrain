@@ -154,7 +154,6 @@ app.post("/api/v1/content", AuthMiddleware, async (req: Request, res: Response) 
 
     if (tags && Array.isArray(tags)) {
       for (const tagName of tags) {
-
         let existingTag = await TagModel.findOne({ title: tagName });
 
         if (!existingTag) {
@@ -164,14 +163,15 @@ app.post("/api/v1/content", AuthMiddleware, async (req: Request, res: Response) 
         tagIds.push(existingTag._id);
       }
     }
+const normalizedType = type.toLowerCase(); 
 
-    const newContent = await contentModel.create({
-      link,
-      type,
-      title,
-      tags: tagIds,
-      userId,
-    });
+const newContent = await contentModel.create({
+  link,
+  type: normalizedType,
+  title,
+  tags: tagIds,
+  userId,
+});
 
     return res.status(200).json({
       message: "Content Added Successfully",
