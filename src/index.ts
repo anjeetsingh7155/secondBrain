@@ -1,3 +1,4 @@
+
 import * as z from "zod";
 import express, { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
@@ -9,7 +10,6 @@ import crypto from "crypto";
 
 const app = express();
 const cors = require("cors");
-const port = 5000;
 const mongoose = require("mongoose");
 
 const dotenv = require("dotenv");
@@ -31,8 +31,20 @@ databaseConnection()
   });
 
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://second-brain-xi-two-75.vercel.app",
+    credentials: true,
+  })
+);
 app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.json({
+    message: "SecondBrain Backend Running 🚀",
+  });
+});
+
 
 app.post("/api/v1/signup", async (req: Request, res: Response) => {
   try {
@@ -346,6 +358,4 @@ app.get("/api/v1/brain/:shareLink", async (req: Request, res: Response) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+export default app;
