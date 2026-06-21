@@ -33,7 +33,7 @@ databaseConnection()
 
 app.use(
   cors({
-    origin: "https://second-brain-xi-two-75.vercel.app",
+    origin: "https://second-brain-mauve-eight.vercel.app/",
     credentials: true,
   })
 );
