@@ -7,4 +7,4 @@ export type userType = {
     userName : string
 }
 
-export const contentTypes = ['youtube' , 'twitter']; 
+export const contentTypes = ['youtube' , 'twitter', 'instagram', 'facebook', 'reddit']; 

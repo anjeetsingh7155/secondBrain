@@ -7,7 +7,7 @@ import { userType } from "./types";
 import Jwt from "jsonwebtoken";
 import { AuthMiddleware } from "./middleware";
 import crypto from "crypto";
-
+const port = 2236
 const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -61,9 +61,12 @@ app.post("/api/v1/signup", async (req: Request, res: Response) => {
     const safeObject = safetyCheck.safeParse(req.body);
 
     if (!safeObject.success) {
-      return res.status(403).json({
-        message: "Wrong Credentials",
-        error: safeObject.error,
+      return res.status(400).json({
+        message: "Validation Failed",
+        errors: safeObject.error.issues.map((err: any) => ({
+          field: err.path.join("."),
+          message: err.message,
+        })),
       });
     }
 
@@ -101,11 +104,19 @@ app.post("/api/v1/signup", async (req: Request, res: Response) => {
 
 app.post("/api/v1/login", async (req: Request, res: Response) => {
    try {
-    const { userName, email, password } = req.body;
+    const { usernameOrEmail, password } = req.body;
+
+    if (!usernameOrEmail || !password) {
+      return res.status(400).json({
+        message: "Username/Email and Password are required",
+      });
+    }
 
     const user: userType | null = await userModel.findOne({ 
-      userName: userName, 
-      email: email,
+      $or: [
+        { userName: usernameOrEmail },
+        { email: usernameOrEmail }
+      ]
      });
 
     if (!user) {
@@ -357,5 +368,7 @@ app.get("/api/v1/brain/:shareLink", async (req: Request, res: Response) => {
     });
   }
 });
+
+app.listen(port)
 
 export default app;
