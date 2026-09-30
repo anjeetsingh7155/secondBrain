@@ -40,9 +40,60 @@ app.use(
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.json({
-    message: "SecondBrain Backend Running 🚀",
-  });
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>SecondBrain API</title>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          margin: 0;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+        }
+        .container {
+          text-align: center;
+          padding: 2rem;
+        }
+        h1 {
+          font-size: 3rem;
+          margin: 0;
+        }
+        p {
+          font-size: 1.2rem;
+          opacity: 0.9;
+        }
+        .api-info {
+          margin-top: 2rem;
+          padding: 1rem;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+          backdrop-filter: blur(10px);
+        }
+      </style>
+      <script>
+        window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+      </script>
+      <script defer src="/_vercel/speed-insights/script.js"></script>
+    </head>
+    <body>
+      <div class="container">
+        <h1>🧠 SecondBrain API</h1>
+        <p>Backend Running Successfully</p>
+        <div class="api-info">
+          <p>API Base URL: <code>/api/v1</code></p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `);
 });
 
 
